@@ -35,6 +35,14 @@ ls -lah /home/build/immortalwrt/packages/
 
 # 输出调试信息
 echo "$(date '+%Y-%m-%d %H:%M:%S') - 开始构建..."
+
+# 增强：支持USB/手机共享/有线/无线驱动
+# ==============================================================
+
+# 创建临时日志文件
+LOG_FILE="/tmp/autobuild_drivers.log"
+echo "===== 驱动集成日志 [$(date)] =====" > $LOG_FILE
+
 # 定义所需安装的包列表 下列插件你都可以自行删减
 PACKAGES=""
 PACKAGES="$PACKAGES curl"
@@ -50,6 +58,105 @@ PACKAGES="$PACKAGES luci-app-openclash"
 PACKAGES="$PACKAGES luci-i18n-homeproxy-zh-cn"
 PACKAGES="$PACKAGES openssh-sftp-server"
 PACKAGES="$PACKAGES luci-i18n-samba4-zh-cn"
+
+# ===== 驱动增强区域开始 =====
+echo "=== 检测和添加系统驱动支持 ===" >> $LOG_FILE
+
+# 检查并添加USB基础支持 (如未包含)
+if ! grep -q "kmod-usb-core" <<< "$PACKAGES"; then
+    echo "[+] 添加USB核心驱动" >> $LOG_FILE
+    PACKAGES="$PACKAGES kmod-usb-core kmod-usb2 kmod-usb3"
+fi
+
+# 添加USB存储支持
+PACKAGES="$PACKAGES kmod-usb-storage kmod-usb-storage-extras kmod-usb-storage-uas"
+echo "[+] 添加USB存储支持" >> $LOG_FILE
+
+# 添加USB网络共享支持 (手机热点)
+USB_NET_DRIVERS="kmod-usb-net kmod-usb-net-cdc-ether kmod-usb-net-rndis kmod-usb-net-ipheth"
+for driver in $USB_NET_DRIVERS; do
+    if ! grep -q "$driver" <<< "$PACKAGES"; then
+        PACKAGES="$PACKAGES $driver"
+        echo "[+] 添加USB网络驱动: $driver" >> $LOG_FILE
+    fi
+done
+
+# 添加手机MTP支持
+MTP_DRIVERS="kmod-fs-f2fs kmod-nls-cp437 kmod-nls-iso8859-1 mtp"
+for driver in $MTP_DRIVERS; do
+    if ! grep -q "$driver" <<< "$PACKAGES"; then
+        PACKAGES="$PACKAGES $driver"
+        echo "[+] 添加MTP驱动: $driver" >> $LOG_FILE
+    fi
+done
+
+# 添加有线网卡驱动支持 (主流芯片组)
+WIRED_DRIVERS="
+    kmod-e1000e        # Intel千兆网卡
+    kmod-igb           # Intel万兆网卡
+    kmod-ixgbe         # Intel 10GbE网卡
+    kmod-tg3           # Broadcom网卡
+    kmod-r8169         # Realtek RTL8169
+    kmod-r8125         # Realtek RTL8125 2.5G
+    kmod-forcedeth     # NVIDIA网卡
+    kmod-atl1          # Atheros千兆
+    kmod-atl2          # Atheros千兆
+    kmod-atl1e         # Atheros千兆
+    kmod-alx           # Qualcomm/Atheros网卡
+"
+for driver in $WIRED_DRIVERS; do
+    if ! grep -q "$driver" <<< "$PACKAGES"; then
+        PACKAGES="$PACKAGES $driver"
+        echo "[+] 添加有线网卡驱动: $driver" >> $LOG_FILE
+    fi
+done
+
+# 添加Intel无线驱动
+INTEL_WIRELESS="
+    kmod-iwlwifi       # Intel无线核心驱动
+    kmod-iwl3945       # 3945ABG
+    kmod-iwl4965       # 4965AGN
+    kmod-iwl1000       # 1000系列
+    kmod-iwl2000       # 2000系列
+    kmod-iwl3160       # 3160AC
+    kmod-iwl7260       # 7260AC
+    kmod-iwl7265       # 7265AC
+    kmod-iwl7265d      # 7265DAC
+    iwlwifi-firmware-7260 # 固件
+"
+for driver in $INTEL_WIRELESS; do
+    if ! grep -q "$driver" <<< "$PACKAGES"; then
+        PACKAGES="$PACKAGES $driver"
+        echo "[+] 添加Intel无线驱动: $driver" >> $LOG_FILE
+    fi
+done
+
+# 添加其他常见无线驱动
+OTHER_WIRELESS="
+    kmod-rtl818x       # Realtek RTL818x通用
+    kmod-rtl8192ce     # RTL8192CE
+    kmod-rtl8192cu     # RTL8192CU
+    kmod-rtl8192de     # RTL8192DE
+    kmod-rtl8192se     # RTL8192SE
+    kmod-rtl8192ee     # RTL8192EE
+    kmod-rtl8723ae     # RTL8723AE
+    kmod-rtl8723be     # RTL8723BE
+    kmod-rtl8812au-ct  # RTL8812AU/8821AU
+    kmod-rtl88x2bu     # RTL88x2BU
+    wpad-openssl       # WPA2/WPA3企业加密
+"
+for driver in $OTHER_WIRELESS; do
+    if ! grep -q "$driver" <<< "$PACKAGES"; then
+        PACKAGES="$PACKAGES $driver"
+        echo "[+] 添加通用无线驱动: $driver" >> $LOG_FILE
+    fi
+done
+
+# 添加无线管理应用
+PACKAGES="$PACKAGES luci-app-wifischedule"
+echo "[+] 添加无线管理应用: luci-app-wifischedule" >> $LOG_FILE
+
+# ===== 驱动增强区域结束 =====
 
 # ====自添加====
 #PACKAGES="$PACKAGES "
@@ -71,6 +178,15 @@ PACKAGES="$PACKAGES luci-i18n-zerotier-zh-cn"
 
 
 # ====结束自添加====
+# 显示最终包列表
+echo -e "\n===== 最终包列表 ====="
+echo $PACKAGES | tr ' ' '\n' | sort
+
+# 显示日志文件位置
+echo -e "\n驱动集成日志已保存至: $LOG_FILE"
+echo "请检查驱动添加情况后再执行构建"
+
+
 
 # 静态文件服务器dufs(推荐)
 PACKAGES="$PACKAGES luci-i18n-dufs-zh-cn"
