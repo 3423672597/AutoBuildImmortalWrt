@@ -82,7 +82,7 @@ for driver in $USB_NET_DRIVERS; do
 done
 
 # 添加手机MTP支持
-MTP_DRIVERS="kmod-fs-f2fs kmod-nls-cp437 kmod-nls-iso8859-1 mtp"
+MTP_DRIVERS="kmod-fs-f2fs kmod-nls-cp437 kmod-nls-iso8859-1"
 for driver in $MTP_DRIVERS; do
     if ! grep -q "$driver" <<< "$PACKAGES"; then
         PACKAGES="$PACKAGES $driver"
