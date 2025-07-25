@@ -20,6 +20,21 @@ else
     . "$SETTINGS_FILE"
 fi
 
+#虚拟机网卡检测开始
+echo "=== Debug Info ===" > /tmp/debug-net.txt
+echo "网口列表：" >> /tmp/debug-net.txt
+ls /sys/class/net/ >> /tmp/debug-net.txt
+
+echo "检测到的物理接口：" >> /tmp/debug-net.txt
+for iface in /sys/class/net/*; do
+    iface_name=$(basename "$iface")
+    echo "检查接口 $iface_name" >> /tmp/debug-net.txt
+    if [ -e "$iface/device" ] && echo "$iface_name" | grep -Eq '^eth|^en'; then
+        echo "匹配成功: $iface_name" >> /tmp/debug-net.txt
+    fi
+done
+#虚拟基网卡检测结束
+
 # 计算网卡数量
 count=0
 ifnames=""
