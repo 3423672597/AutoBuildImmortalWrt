@@ -54,13 +54,21 @@ PACKAGES="$PACKAGES luci-i18n-argon-config-zh-cn"
 #24.10
 PACKAGES="$PACKAGES luci-i18n-package-manager-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-ttyd-zh-cn"
-PACKAGES="$PACKAGES luci-i18n-passwall-zh-cn"
-PACKAGES="$PACKAGES luci-app-openclash"
-PACKAGES="$PACKAGES luci-i18n-homeproxy-zh-cn"
+#PACKAGES="$PACKAGES luci-i18n-passwall-zh-cn"
+#PACKAGES="$PACKAGES luci-app-openclash"
+#PACKAGES="$PACKAGES luci-i18n-homeproxy-zh-cn"
 PACKAGES="$PACKAGES openssh-sftp-server"
 PACKAGES="$PACKAGES luci-i18n-samba4-zh-cn"
+
+# 自添加插件
+PACKAGES="$PACKAGES luci-i18n-mwan3-zh-cn"
+PACKAGES="$PACKAGES luci-i18n-autoreboot-zh-cn"
+PACKAGES="$PACKAGES luci-i18n-attendedsysupgrade-zh-cn"
+PACKAGES="$PACKAGES luci-i18n-ddns-go-zh-cn"
+PACKAGES="$PACKAGES luci-i18n-upnp-zh-cn"
+PACKAGES="$PACKAGES luci-i18n-usb-printer-zh-cn"
 # 文件管理器
-PACKAGES="$PACKAGES luci-i18n-filemanager-zh-cn"
+#PACKAGES="$PACKAGES luci-i18n-filemanager-zh-cn"
 # 静态文件服务器dufs(推荐)
 PACKAGES="$PACKAGES luci-i18n-dufs-zh-cn"
 # ======== shell/custom-packages.sh =======
